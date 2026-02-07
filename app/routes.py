@@ -32,3 +32,16 @@ async def shorten_url(request: Request) -> JSONResponse:
     logger.info(f"Shortened URL created: {original_url} -> {short_url}")
 
     return JSONResponse(content={"short_url": short_url})
+
+
+@router.get("/{code}")
+def redirect_to_url(code: str) -> RedirectResponse:
+    link = get_link_by_code(code)
+
+    if link is None:
+        logger.warning(f"Short code not found: {code}")
+        raise HTTPException(status_code=404, detail="Short URL not found")
+
+    logger.info(f"Redirecting {code} -> {link['original_url']}")
+
+    return RedirectResponse(url=link["original_url"], status_code=307)
